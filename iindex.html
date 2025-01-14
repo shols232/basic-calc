@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Basic Grid Calculator</title>
+  <style>
+    /* Container styles */
+    #calcContainer {
+      display: grid;
+      grid-template-columns: repeat(4, 60px);
+      gap: 10px;
+      width: 270px;
+      margin: 50px auto;
+    }
+
+    /* Display at the top, spans all columns */
+    #display {
+      grid-column: 1 / -1;
+      height: 60px;
+      line-height: 60px;
+      font-size: 24px;
+      text-align: right;
+      padding-right: 10px;
+      border: 1px solid #ccc;
+      background: #fafafa;
+      box-sizing: border-box;
+    }
+
+    /* Button styles */
+    #calcContainer button {
+      width: 60px;
+      height: 60px;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    /* Example to highlight operators differently (optional) */
+    .operator {
+      background-color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="calcContainer">
+    <!-- Display area -->
+    <div id="display">0</div>
+    
+    <!-- Number and operator buttons -->
+    <button class="number">7</button>
+    <button class="number">8</button>
+    <button class="number">9</button>
+    <button class="operator">/</button>
+    
+    <button class="number">4</button>
+    <button class="number">5</button>
+    <button class="number">6</button>
+    <button class="operator">*</button>
+
+    <button class="number">1</button>
+    <button class="number">2</button>
+    <button class="number">3</button>
+    <button class="operator">-</button>
+    
+    <button class="number">0</button>
+    <button class="operator">+</button>
+    <button id="equals" class="operator">=</button>
+    <button id="clear" class="operator">Clear</button>
+  </div>
+
+  <script>
+    const display = document.getElementById('display');
+    
+    // We'll track:
+    // - the current input (as a string),
+    // - the previous input,
+    // - and the current operator (+, -, *, /).
+    let currentInput = "0";
+    let previousInput = "0";
+    let currentOperator = null;
+
+    // Update the display with the current value.
+    function updateDisplay(value) {
+      display.textContent = value;
+    }
+
+    // Handle number button clicks.
+    function handleNumberClick(num) {
+      // If the current input is "0", replace it. Otherwise, append the digit.
+      if (currentInput === "0") {
+        currentInput = num;
+      } else {
+        currentInput += num;
+      }
+      updateDisplay(currentInput);
+    }
+
+    // Handle operator button clicks.
+    function handleOperatorClick(op) {
+      // If we already have an operator, compute the existing operation first.
+      if (currentOperator !== null) {
+        computeResult();
+      }
+      // Store the current input as the 'previousInput', reset currentInput for next number.
+      previousInput = currentInput;
+      currentInput = "0";
+      currentOperator = op;
+    }
+
+    // Compute the result of previousInput (operator) currentInput.
+    function computeResult() {
+      const prev = parseFloat(previousInput);
+      const current = parseFloat(currentInput);
+      let result = 0;
+
+      switch (currentOperator) {
+        case '+':
+          result = prev + current;
+          break;
+        case '-':
+          result = prev - current;
+          break;
+        case '*':
+          result = prev * current;
+          break;
+        case '/':
+          // Check for divide-by-zero scenario
+          if (current === 0) {
+            alert("Cannot divide by zero!");
+            return;
+          }
+          result = prev / current;
+          break;
+        default:
+          return; // No valid operator, do nothing
+      }
+
+      // Convert result back to string to keep the display consistent
+      currentInput = result.toString();
+      currentOperator = null;
+      previousInput = "0";
+      updateDisplay(currentInput);
+    }
+
+    // Handle equals (=) button
+    function handleEquals() {
+      if (currentOperator === null) return; // Nothing to compute
+      computeResult();
+    }
+
+    // Handle clear button
+    function handleClear() {
+      currentInput = "0";
+      previousInput = "0";
+      currentOperator = null;
+      updateDisplay(currentInput);
+    }
+
+    // Event listeners for all buttons
+    document.querySelectorAll('.number').forEach(btn => {
+      btn.addEventListener('click', () => handleNumberClick(btn.textContent));
+    });
+
+    document.querySelectorAll('.operator').forEach(btn => {
+      // Skip = and Clear since they have special logic
+      if (btn.id !== 'equals' && btn.id !== 'clear') {
+        btn.addEventListener('click', () => handleOperatorClick(btn.textContent));
+      }
+    });
+
+    document.getElementById('equals').addEventListener('click', handleEquals);
+    document.getElementById('clear').addEventListener('click', handleClear);
+  </script>
+
+</body>
+</html>
